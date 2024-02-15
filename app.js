@@ -27,7 +27,7 @@ btnDeleteAll.addEventListener("click", deleteAllTasks);
 
 function addTodoTask() {
     const taskText = taskInput.value;
-
+    if (!taskInput.value.trim()) return taskInput.focus();
     const newTask = {
         id: Date.now(),
         text: taskText,
@@ -37,7 +37,6 @@ function addTodoTask() {
     tasks.push(newTask);
     saveToLocalStorage();
 
-    if (!taskInput.value.trim()) return taskInput.focus();
     renderTask(newTask);
     taskInput.value = "";
     taskInput.focus();
