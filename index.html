@@ -27,6 +27,7 @@
                                 type="button"
                                 class="btn-add"
                                 data-action="todo"
+                                id="btn-todo-add"
                             >
                                 <img src="icons/add.svg" alt="" />Add Todo
                             </button>
@@ -34,12 +35,17 @@
                                 type="button"
                                 class="btn-add"
                                 data-action="group"
+                                id="btn-group-add"
                             >
                                 <img src="icons/add.svg" alt="" />Add Group
                             </button>
                         </div>
                     </form>
-                    <ul id="tasksList" class="list-group"></ul>
+                    <ul
+                        id="tasksList"
+                        class="list-group"
+                        data-action="drag-container1"
+                    ></ul>
                 </div>
                 <button class="btn-delete-all" data-action="delete-all">
                     <img src="icons/delete.svg" alt="delete all" />

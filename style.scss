@@ -80,6 +80,7 @@ body {
     border: 1px solid #dedfe5;
     border-radius: 8px;
     list-style: none;
+    background-color: white;
     &:hover {
         background-color: #efefef;
         .btn-edit,
@@ -88,6 +89,61 @@ body {
         }
     }
 }
+
+.list-group-task {
+    margin: 16px;
+    padding: 16px;
+    border: 1px solid #dedfe5;
+    border-radius: 8px;
+    list-style: none;
+    background-color: #c4c4ff;
+}
+.list-group-task-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.btn-accordion {
+    width: 19px;
+    height: 19px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    img {
+        width: 16px;
+        height: 16px;
+        pointer-events: none;
+    }
+}
+.group-item-title {
+    width: 90%;
+    p {
+        word-wrap: break-word;
+        line-height: 16px;
+        outline: none;
+    }
+}
+.group-item-buttons {
+    display: flex;
+    justify-content: flex-end;
+    button {
+        border: none;
+        outline: none;
+        background: none;
+        cursor: pointer;
+        img {
+            pointer-events: none;
+        }
+    }
+    .btn-accept {
+        display: none;
+    }
+}
+.group-open {
+    display: none;
+}
+
 .task-item-title {
     display: flex;
     align-items: flex-start;
@@ -146,6 +202,7 @@ body {
     border: none;
     border-radius: 8px;
     background-color: white;
+    color: #323749;
     cursor: pointer;
     img {
         width: 16px;
