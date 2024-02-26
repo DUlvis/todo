@@ -8,11 +8,16 @@ const taskInput = document.querySelector(".form input"),
 let tasks = [];
 if (localStorage.getItem("tasks")) {
     tasks = JSON.parse(localStorage.getItem("tasks"));
+
     tasks.forEach((task) => {
         if (task.items) {
+            if (task.open) {
+                btnGroupAdd.classList.add("none");
+            }
             renderInitialGroup(task);
         } else renderTask(getTask(task), tasksList);
     });
+    dragNDrop();
 }
 
 form.addEventListener("submit", (e) => e.preventDefault());
@@ -55,7 +60,7 @@ function addTodoTask() {
     }
 
     saveToLocalStorage();
-
+    dragNDrop();
     taskInput.value = "";
     taskInput.focus();
 }
@@ -73,6 +78,7 @@ function addGroupTasks() {
     saveToLocalStorage();
 
     renderGroup(newGroup);
+    dragNDrop();
     taskInput.value = "";
     taskInput.focus();
 }
@@ -100,11 +106,13 @@ function deleteTask(event) {
     saveToLocalStorage();
 
     parentNode.remove();
+    dragNDrop();
 }
 function deleteAllTasks() {
     tasks = [];
     saveToLocalStorage();
     tasksList.innerHTML = "";
+    dragNDrop();
 }
 
 function startEditTask(event) {
@@ -202,8 +210,7 @@ function doneTask(event) {
         }
 
         taskDone.done = !taskDone.done;
-        // const task = tasks.find((task) => task.id === id);
-        // task.done = !task.done;
+
         saveToLocalStorage();
 
         const btnEdit = parentNode.querySelector(".btn-edit");
@@ -219,7 +226,7 @@ function getTask(task) {
     const isDone = task.done ? "checked" : "";
     const cssClass = task.done ? "task-btn btn-edit none" : "task-btn btn-edit";
 
-    const taskHTML = `<li id="${task.id}" draggable="true" class="list-group-item">
+    const taskHTML = `<li id="${task.id}" draggable="true" class="list-group-item draggable">
         <div class="task-item-title">
             <input type="checkbox" ${isDone}/>
             <p class="text-task">${task.text}</p>
@@ -266,15 +273,15 @@ function openGroup(event) {
     const group = tasks.find((task) => task.id === id);
     group.open = !group.open;
     group.open ? (btn.src = "icons/up.svg") : (btn.src = "icons/down.svg");
-    // group.open
-    //     ? btnGroupAdd.classList.add("none")
-    //     : btnGroupAdd.classList.remove("none");
+    group.open
+        ? btnGroupAdd.classList.add("none")
+        : btnGroupAdd.classList.remove("none");
     groupOpen.classList.toggle("block");
-    btnGroupAdd.classList.toggle("none");
     saveToLocalStorage();
 }
 
 function renderGroup(group) {
+    const groupItem = tasksList.querySelector(".list-group-task");
     const isOpen = group.open ? "group-open block" : "group-open";
     const svg = group.open ? "icons/up.svg" : "icons/down.svg";
 
@@ -295,9 +302,8 @@ function renderGroup(group) {
     </div>
     <div class="${isOpen}">
         <ul
-            id="groupList"
-            class="group-list-tasks"
-            data-aсtion="drag-container2"
+            
+            class="group-list-tasks drag-container"
         >
         </ul>
         <div class="group-item-buttons">
@@ -328,12 +334,13 @@ function renderGroup(group) {
         </div>
     </div>
 </li>`;
-
-    tasksList.insertAdjacentHTML("afterbegin", groupHTML);
+    groupItem
+        ? groupItem.insertAdjacentHTML("afterend", groupHTML)
+        : tasksList.insertAdjacentHTML("afterbegin", groupHTML);
 }
 function renderTaskInGroup(task, group) {
     const id = document.getElementById(group.id);
-    const groupElement = id.querySelector("#groupList");
+    const groupElement = id.querySelector(".group-list-tasks");
 
     renderTask(getTask(task), groupElement);
 }
@@ -347,4 +354,105 @@ function renderInitialGroup(group) {
     group.items.forEach((task) => {
         renderTaskInGroup(task, group);
     });
+}
+
+function dragNDrop() {
+    const draggables = document.querySelectorAll(".draggable");
+    const containers = document.querySelectorAll(".drag-container");
+    const list = document.querySelectorAll("#tasksList > li");
+
+    draggables.forEach((draggable) => {
+        draggable.addEventListener("dragstart", () => {
+            draggable.classList.add("dragging");
+        });
+        draggable.addEventListener("dragend", () => {
+            draggable.classList.remove("dragging");
+            dragEnd();
+        });
+    });
+
+    tasksList.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (tasksList.querySelectorAll(".list-group-item").length === 0) {
+            const dragging = document.querySelector(".dragging");
+            tasksList.appendChild(dragging);
+        }
+    });
+
+    list.forEach((listItem) => {
+        listItem.addEventListener("drop", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const currentTarget = e.currentTarget;
+
+            const dragging = document.querySelector(".dragging");
+
+            if (currentTarget.classList.contains("list-group-task")) {
+                const groupList =
+                    currentTarget.querySelector(".group-list-tasks");
+                groupList.appendChild(dragging);
+            } else {
+                currentTarget.parentNode.insertBefore(dragging, currentTarget);
+            }
+        });
+    });
+
+    containers.forEach((container) => {
+        container.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const dragging = document.querySelector(".dragging");
+            const dropTarget = getDropPosition(container, e.clientY);
+            if (dropTarget) {
+                container.insertBefore(dragging, dropTarget);
+            } else {
+                container.appendChild(dragging);
+            }
+        });
+    });
+
+    function getDropPosition(container, y) {
+        const draggableElements = [
+            ...container.querySelectorAll(".draggable:not(.dragging)"),
+        ];
+
+        for (const draggable of draggableElements) {
+            const pos = draggable.getBoundingClientRect();
+            if (y < pos.bottom) {
+                return draggable;
+            }
+        }
+        return null;
+    }
+}
+
+function dragEnd() {
+    const newTasks = [];
+    const items = tasksList.querySelectorAll("#tasksList > li");
+    items.forEach((item) => {
+        let id = Number(item.id);
+        let text = item.querySelector(".text-task").textContent;
+
+        if (item.getAttribute("class") === "list-group-task") {
+            let groupItems = item.querySelectorAll(".group-list-tasks li");
+            let open = item
+                .querySelector(".group-open")
+                .classList.contains("block");
+            let items = [];
+            groupItems.forEach((item) => {
+                let id = Number(item.id);
+                let text = item.querySelector(".text-task").textContent;
+                let done = item.querySelector("input").checked;
+                items.push({ id, text, done });
+            });
+            newTasks.push({ id, open, text, items });
+        } else {
+            let done = item.querySelector("input").checked;
+            newTasks.push({ id, text, done });
+        }
+    });
+    localStorage.setItem("tasks", JSON.stringify(newTasks));
 }

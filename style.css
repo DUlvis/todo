@@ -72,6 +72,10 @@ body {
   margin-right: 4px;
 }
 
+.list-group {
+  padding-bottom: 20px;
+}
+
 .list-group-item {
   display: flex;
   align-items: flex-start;
@@ -147,6 +151,10 @@ body {
 
 .group-open {
   display: none;
+}
+
+.group-list-tasks {
+  padding: 10px 0;
 }
 
 .task-item-title {
@@ -228,6 +236,14 @@ body {
 
 .line-through {
   text-decoration: line-through;
+}
+
+.draggable {
+  cursor: pointer;
+}
+
+.dragging {
+  background-color: #eaeaea;
 }
 
 @media (min-width: 768px) {
